@@ -1,0 +1,152 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+/*
+ * Create the Student and Priorities classes here.
+ */
+ 
+// Student class
+import java.util.*; // Required for List, ArrayList, PriorityQueue, Comparator
+
+/**
+ * The Student class represents a student with an ID, name, and CGPA.
+ */
+class Student {
+    private int id;         // Unique identifier for the student
+    private String name;    // Name of the student
+    private double cgpa;    // Cumulative Grade Point Average of the student
+
+    /**
+     * Constructor to initialize a Student object.
+     * 
+     * @param id   The student's ID.
+     * @param name The student's name.
+     * @param cgpa The student's CGPA.
+     */
+    public Student(int id, String name, double cgpa) {
+        this.id = id;
+        this.name = name;
+        this.cgpa = cgpa;
+    }
+
+    /**
+     * Getter for the student's ID.
+     * 
+     * @return The student's ID.
+     */
+    public int getID() {
+        return id;
+    }
+
+    /**
+     * Getter for the student's name.
+     * 
+     * @return The student's name.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Getter for the student's CGPA.
+     * 
+     * @return The student's CGPA.
+     */
+    public double getCGPA() {
+        return cgpa;
+    }
+}
+
+
+/**
+ * The Priorities class processes a list of event strings and determines
+ * the order in which students are served based on their priority.
+ * 
+ * Priority Rules:
+ * 1. Higher CGPA students are served first.
+ * 2. If CGPAs are equal, student with lexicographically smaller name is served first.
+ * 3. If names are also equal, student with smaller ID is served first.
+ */
+class Priorities {
+
+    /**
+     * Processes a list of event strings ("ENTER name cgpa id" or "SERVED") and
+     * returns a list of students who remain in the priority queue after all events.
+     * 
+     * @param events A list of event strings.
+     * @return A list of Student objects still in the queue, in priority order.
+     */
+    public List<Student> getStudents(List<String> events) {
+
+        // Create a priority queue with custom comparator to define student priority.
+        PriorityQueue<Student> queue = new PriorityQueue<Student>(100, new Comparator<Student>() {
+
+            /**
+             * Comparator to define the order of students in the queue.
+             * - Higher CGPA comes first.
+             * - If CGPA is equal, lexicographically smaller name comes first.
+             * - If name is also equal, smaller ID comes first.
+             */
+            public int compare(Student a, Student b) {
+                if (Double.compare(b.getCGPA(), a.getCGPA()) != 0) {
+                    return Double.compare(b.getCGPA(), a.getCGPA()); // Higher CGPA first
+                } else if (!a.getName().equals(b.getName())) {
+                    return a.getName().compareTo(b.getName()); // Lexicographically smaller name
+                } else {
+                    return a.getID() - b.getID(); // Smaller ID
+                }
+            }
+        });
+
+        // Process each event in the list
+        for (String event : events) {
+            if (event.startsWith("ENTER")) {
+                // Split event string: "ENTER name cgpa id"
+                String[] parts = event.split(" ");
+                String name = parts[1];
+                double cgpa = Double.parseDouble(parts[2]);
+                int id = Integer.parseInt(parts[3]);
+
+                // Create and add a new Student to the queue
+                queue.add(new Student(id, name, cgpa));
+            } else if (event.equals("SERVED")) {
+                // Remove the student with the highest priority
+                queue.poll();
+            }
+        }
+
+        // Extract all remaining students from the queue
+        List<Student> remaining = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            remaining.add(queue.poll()); // poll maintains the priority order
+        }
+
+        return remaining; // Final ordered list of remaining students
+    }
+}
+
+
+public class Solution {
+    private final static Scanner scan = new Scanner(System.in);
+    private final static Priorities priorities = new Priorities();
+    
+    public static void main(String[] args) {
+        int totalEvents = Integer.parseInt(scan.nextLine());    
+        List<String> events = new ArrayList<>();
+        
+        while (totalEvents-- != 0) {
+            String event = scan.nextLine();
+            events.add(event);
+        }
+        
+        List<Student> students = priorities.getStudents(events);
+        
+        if (students.isEmpty()) {
+            System.out.println("EMPTY");
+        } else {
+            for (Student st: students) {
+                System.out.println(st.getName());
+            }
+        }
+    }
+}

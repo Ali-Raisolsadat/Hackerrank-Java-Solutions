@@ -1,0 +1,199 @@
+import java.util.*;
+
+public class LinkedList {
+	private Node first; // reference to the first node (head)
+    	private Node tail;  // reference to the last node (tail)
+
+    	/**
+     	* Constructs an empty linked list.
+     	*/
+    	public LinkedList() {
+        	first = null;
+        	tail = null;
+    	}
+
+    	/**
+     	* Inner class representing a node in the linked list.
+    	*/
+    	class Node {
+        	public Object data; // data stored in the node
+        	public Node next;   // reference to the next node
+    	}
+
+    	/**
+     	* Adds an element to the front of the list.
+     	* @param element the element to add
+     	*/
+    	public void addFirst(Object element) {
+        	Node newNode = new Node(); // create a new node
+        	newNode.data = element;    // set its data
+        	newNode.next = first;      // link it to the current first node
+        	first = newNode;           // update first to new node
+
+        	// If list was empty, tail should also point to the new node
+        	if (tail == null) {
+            		tail = newNode;
+        	}
+    	}
+
+    	/**
+     	* Removes and returns the first element of the list.
+     	* @return the removed element
+     	* @throws NoSuchElementException if the list is empty
+     	*/
+    	public Object removeFirst() {
+        	if (first == null) {
+            		throw new NoSuchElementException();
+        	}
+        	Object element = first.data;   // store data to return
+        	first = first.next;            // move first pointer to next node
+
+        	// If list is now empty, clear tail reference as well
+        	if (first == null) {
+            		tail = null;
+        	}
+
+        	return element;
+    	}
+
+    	/**
+     	* Adds an element to the end of the list.
+     	* @param element the element to add
+    	 */
+    	public void addLast(Object element) {
+       		Node newNode = new Node();  // create new node
+        	newNode.data = element;     // set data
+        	newNode.next = null;        // new last node points to null
+
+        	if (first == null) {
+           		// If list empty, first and tail both point to new node
+            		first = newNode;
+            		tail = newNode;
+        	} else {
+            		// Otherwise, link current tail to new node and update tail
+            		tail.next = newNode;
+            		tail = newNode;
+        	}
+    	}
+
+    	/**
+     	* Removes and returns the last element of the list.
+     	* @return the removed element
+     	* @throws NoSuchElementException if the list is empty
+     	*/
+    	public Object removeLast() {
+        	if (first == null) {
+            		throw new NoSuchElementException();
+        	}
+
+        	// If only one element exists, clear both first and tail
+        	if (first == tail) {
+            		Object element = first.data;
+            		first = null;
+            		tail = null;
+            		return element;
+        	}
+
+        	// Traverse to the second last node
+        	Node current = first;
+        	while (current.next != tail) {
+            		current = current.next;
+        	}
+
+        	Object element = tail.data;  // data to return
+        	current.next = null;         // remove last node
+        	tail = current;              // update tail reference
+        	return element;
+    	}
+
+	/**
+ 	* An iterator for the LinkedList class, implementing ListIterator interface.
+ 	* Allows traversing and modifying the list during iteration.
+ 	*/
+	class LinkedListIterator implements ListIterator {
+    		private Node position;     // current position in the list (last returned node)
+    		private Node previous;     // node before current position
+    		private boolean isAfterNext; // true if next() was called before remove()
+
+    		/**
+     		* Constructs a new LinkedListIterator starting before the first element.
+     		*/
+    		public LinkedListIterator() {
+        		position = null;
+        		previous = null;
+        		isAfterNext = false;
+    		}
+
+    		/**
+    	 	* Returns true if there is a next element in the iteration.
+     		* @return true if next element exists
+     		*/
+    		public boolean hasNext() {
+        		if (position == null) {
+           	 	return first != null;
+        		} else {
+           	 	return position.next != null;
+        		}
+    		}
+
+    		/**
+    	 	* Returns the next element in the iteration and advances the iterator.
+     		* @return the next element's data
+     		* @throws NoSuchElementException if no next element exists
+     		*/
+    		public Object next() {
+        		if (!hasNext()) {
+            			throw new NoSuchElementException();
+        		}
+
+        		previous = position;
+        		isAfterNext = true;
+
+        		if (position == null) { 
+				position = first;
+        		} else {
+           	 		position = position.next;  // → FIX: you forgot to assign position here
+        		}
+
+        		return position.data;
+   	 	}
+
+    		/**
+     		* Removes the last element returned by next() from the underlying list.
+     		* @throws IllegalStateException if next() was not called before remove()
+     		*/
+   		public void remove() {
+        		if (!isAfterNext) {
+            			throw new IllegalStateException();
+        		}
+
+        		if (position == first) {
+            			removeFirst();
+        		} else {
+            			previous.next = position.next;
+        		}
+        		position = previous;
+        		isAfterNext = false;
+    		}
+
+    		/**
+     		* Inserts the specified element into the list at the current position.
+     		* @param element the element to add
+     		*/
+    		public void add(Object element) {
+        		if (position == null) {
+            			addFirst(element);
+           			position = first;
+        		} else {
+            			Node newNode = new Node();
+            			newNode.data = element;
+            			newNode.next = position.next;
+            			position.next = newNode;
+            			position = newNode;
+        		}
+        		isAfterNext = false;
+    		}
+	}
+
+	
+}
